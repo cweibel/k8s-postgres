@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    db: pg1b
+  name: pg1b
+  namespace: default
+spec:
+#  replicas: 1
+  template:
+    metadata:
+      labels:
+        db: pg1b
+    spec:
+      containers:
+      - image: postgres:11.2
+        imagePullPolicy: IfNotPresent
+        name: pg-demo-container
+#        ports:
+#        - containerPort: 5432
+#          protocol: TCP
+

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pgss2
+spec:
+  selector:
+    matchLabels:
+      run: pgss2
+  serviceName: "pgss2"
+  template:
+    metadata:
+      labels:
+        run: pgss2
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: hello-postgres
+        image: postgres:11.2
+        ports:
+        - containerPort: 5432
+          name: mypostgresport
+        volumeMounts:
+        - name: postgresdatapath2
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:         # Added This Section \/\/\/\/\/\/\/\/
+          exec:
+            command: ["psql", "-w", "-U", "postgres", "-d", "postgres", "-c", "SELECT 1"]
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: postgresdatapath2
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: pgss2
+  name: pgss2
+  namespace: default
+spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+    name: mypostgresport
+  selector:
+    run: pgss2
+  sessionAffinity: None
+  type: NodePort

@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pg6   #name which shows in k deployments, also part of pod name
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: pg6b   #shows in k describe pods, but required ;p... needs to match selector in service later on...
+    spec:
+      containers:
+      - image: postgres:11.2
+        imagePullPolicy: IfNotPresent
+        name: hello-postgres
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: pg6b
+  name: pg6
+  namespace: default
+spec:
+  # clusterIP: 10.99.89.134  Should autoassign
+  externalTrafficPolicy: Cluster
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+    # nodePort: 30728  This will autoassign
+  selector:
+    run: pg6b
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
