@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helm-pg.fullname" . }}
+  labels:
+{{ include "helm-pg.labels" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: mypostgresport
+  selector:
+    app.kubernetes.io/name: {{ include "helm-pg.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
